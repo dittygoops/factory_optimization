@@ -1,3 +1,5 @@
+import pulp
+
 def initialize_factory():
     while True:
         try:
@@ -78,10 +80,57 @@ def initialize_items():
 
     return items
 
+def solve(factory, items):
+    p = pulp.LpProblem("Factory Problem", pulp.LpMaximize)
+
+    products = [pulp.LpVariable(f"{i["name"]}", lowBound=0, cat=pulp.LpInteger) for i in items]
+
+    obj_func = pulp.lpSum((items[i]["price"] - items[i]["cost"]) * products[i] for i in range(len(items)))
+    p += obj_func
+
+    time_constraint = pulp.lpSum(items[i]["time"] * products[i] for i in range(len(items))) <= factory["factory_hours"]
+    p += time_constraint
+
+    budget_constraint = pulp.lpSum(items[i]["cost"] * products[i] for i in range(len(items))) <= factory["factory_budget"]
+    p += budget_constraint
+
+    p.solve()
+
+    #
+
+    print("\n--- Optimization Results ---")
+    print(f"Status: {pulp.LpStatus[p.status]}")
+
+    # If an optimal solution is found
+    if pulp.LpStatus[p.status] == "Optimal":
+        print("\nOptimal Production Quantities:")
+        total_profit = 0
+        total_hours = 0
+        total_cost = 0
+
+        for i, var in enumerate(products):
+            quantity = var.varValue
+            if quantity > 0:
+                profit = (items[i]['price'] - items[i]['cost']) * quantity
+                print(f"{items[i]['name']}: {quantity:.2f} units")
+                print(f"  Profit per unit: ${items[i]['price'] - items[i]['cost']:.2f}")
+                print(f"  Total Profit for this Product: ${profit:.2f}")
+                
+                total_profit += profit
+                total_hours += items[i]['time'] * quantity
+                total_cost += items[i]['cost'] * quantity
+
+        print(f"\nTotal Production Hours: {total_hours:.2f}")
+        print(f"Total Production Cost: ${total_cost:.2f}")
+        print(f"Total Profit: ${total_profit:.2f}")
+    else:
+        print("No optimal solution found.")
+
 def main():
     factory = initialize_factory()
     items = initialize_items()
 
+    solve(factory, items)
 
 if __name__ == "__main__":
     main()
