@@ -57,7 +57,17 @@ def initialize_item():
         except ValueError as e:
             print(f"Invalid input. Please enter a valid number.")
 
-    return {"name": name, "time": time, "cost": cost, "price": price}
+    # Get maximum quantity of the item
+    while True:
+        try:
+            max_quantity = int(input("Maximum Quantity of the Item: "))
+            if max_quantity < 0:
+                raise ValueError("The maximum quantity cannot be negative.")
+            break
+        except ValueError as e:
+            print(f"Invalid input. Please enter a valid number.")
+
+    return {"name": name, "time": time, "cost": cost, "price": price, "max_quantity": max_quantity}
 
 def initialize_items():
     while True:
@@ -82,8 +92,9 @@ def initialize_items():
 
 def solve(factory, items):
     p = pulp.LpProblem("Factory Problem", pulp.LpMaximize)
+    pulp.LpSolverDefault.msg = 0
 
-    products = [pulp.LpVariable(f"{i["name"]}", lowBound=0, cat=pulp.LpInteger) for i in items]
+    products = [pulp.LpVariable(f"{i["name"]}", lowBound=0, upBound=i["max_quantity"], cat=pulp.LpInteger) for i in items]
 
     obj_func = pulp.lpSum((items[i]["price"] - items[i]["cost"]) * products[i] for i in range(len(items)))
     p += obj_func
@@ -95,8 +106,6 @@ def solve(factory, items):
     p += budget_constraint
 
     p.solve()
-
-    #
 
     print("\n--- Optimization Results ---")
     print(f"Status: {pulp.LpStatus[p.status]}")
