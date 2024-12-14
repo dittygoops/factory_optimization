@@ -96,6 +96,30 @@ Quantity of Aluminum needed: 8
 Time to produce the item (hours): 5
 Cost to produce the item ($): 200
 Price to sell the item ($): 1500
+
+
+--- Optimization Results ---
+Status: Optimal
+
+Optimal Production Quantities:
+
+Supply Usage:
+Wire: 197.00/200 used
+  Total Cost: $985.00
+Aluminum: 150.00/150 used
+  Total Cost: $1500.00
+
+Product Production:
+iPhone: 59.00 units
+  Total Cost: $5015.00
+  Total Hours: 118.00
+  Total Revenue: $23600.00
+  Total Profit: $18585.00
+Macbook: 4.00 units
+  Total Cost: $1220.00
+  Total Hours: 20.00
+  Total Revenue: $6000.00
+  Total Profit: $4780.00
 ```
 
 ## How It Works
